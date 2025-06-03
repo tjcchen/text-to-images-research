@@ -7,7 +7,7 @@ from app.services.openai_service import generate_image
 from app.config import get_settings
 
 router = APIRouter(
-    prefix="/api/images",
+    prefix="/images",
     tags=["Images"],
     responses={404: {"description": "Not found"}},
 )

@@ -1,9 +1,12 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import uvicorn
 from typing import List, Optional
+import os
 
 from app.routers import image_router
 from app.config import get_settings
@@ -24,14 +27,18 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Include routers
-app.include_router(image_router.router)
+app.include_router(image_router.router, prefix="/api")
 
-@app.get("/")
+# Mount the static files directory
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    return {"message": "Welcome to Text to Image API. Use /docs to view the API documentation."}
+    return FileResponse('static/index.html')
 
 @app.get("/health")
 async def health_check():

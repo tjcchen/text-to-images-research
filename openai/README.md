@@ -78,6 +78,33 @@ Parameters:
 - `style`: Style of the generated images (vivid or natural)
 - `quality`: Quality of the generated images (standard or hd)
 
+### Example Usage with curl
+
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/api/images/generate' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "prompt": "A sunset over mountains with a lake in the foreground",
+  "n": 1,
+  "size": "1024x1024",
+  "response_format": "url",
+  "style": "vivid",
+  "quality": "standard"
+}'
+```
+
+Example response:
+```json
+{
+  "images": [
+    "https://oaidalleapiprodscus.blob.core.windows.net/private/..."
+  ],
+  "prompt": "A sunset over mountains with a lake in the foreground"
+}
+```
+
 ## License
 
 MIT

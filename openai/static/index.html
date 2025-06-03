@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="text-center my-5">
+            <h1>AI Image Generator</h1>
+            <p class="lead">Generate images from text using OpenAI's DALL-E</p>
+        </header>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title">Generate an Image</h2>
+                        <form id="imageForm" action="#">
+                            <div class="mb-3">
+                                <label for="prompt" class="form-label">Prompt*</label>
+                                <textarea class="form-control" id="prompt" rows="3" placeholder="Describe the image you want to generate..." required></textarea>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="size" class="form-label">Size</label>
+                                    <select class="form-select" id="size">
+                                        <option value="256x256">256x256</option>
+                                        <option value="512x512">512x512</option>
+                                        <option value="1024x1024" selected>1024x1024</option>
+                                        <option value="1792x1024">1792x1024</option>
+                                        <option value="1024x1792">1024x1792</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="n" class="form-label">Number of Images</label>
+                                    <input type="number" class="form-control" id="n" min="1" max="10" value="1">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="style" class="form-label">Style</label>
+                                    <select class="form-select" id="style">
+                                        <option value="vivid" selected>Vivid</option>
+                                        <option value="natural">Natural</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="quality" class="form-label">Quality</label>
+                                    <select class="form-select" id="quality">
+                                        <option value="standard" selected>Standard</option>
+                                        <option value="hd">HD</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="response_format" class="form-label">Response Format</label>
+                                <select class="form-select" id="response_format">
+                                    <option value="url" selected>URL</option>
+                                    <option value="b64_json">Base64 JSON</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary" id="generateBtn">Generate Image</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">Results</h2>
+                        <div id="loadingSpinner" class="text-center d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Generating your image... This may take a few moments.</p>
+                        </div>
+                        <div id="results" class="mt-3">
+                            <p class="text-muted text-center">Your generated images will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

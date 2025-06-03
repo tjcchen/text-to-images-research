@@ -25,7 +25,12 @@ async def generate_image(
         A list of image URLs or base64-encoded JSON strings
     """
     settings = get_settings()
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    # Initialize the OpenAI client with only the API key
+    # Explicitly set http_client to None to prevent proxy issues
+    client = AsyncOpenAI(
+        api_key=settings.openai_api_key,
+        http_client=None
+    )
     
     response = await client.images.generate(
         model="dall-e-3",  # Using DALL-E 3 which is the most advanced model
