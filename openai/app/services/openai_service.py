@@ -15,7 +15,10 @@ logger = logging.getLogger(__name__)
 def process_response(response, response_format):
     """
     Process the API response and extract image data based on response format.
-    
+
+    Sample prompt:
+      Create a trendy social media cover image inspired by Xiaohongshu (RED) posts. Use a modern, youthful aesthetic with a light pastel or stylish vivid color palette. Include soft lighting, and a lifestyle/artistic vibe. Overlay elegant Chinese text “王老师艺术留学工作室” in a clean, semi-transparent font centered or toward the top. The design should look like a fashionable post promoting an art education brand for international students on Xiaohongshu.
+
     Args:
         response: The HTTP response from the OpenAI API
         response_format: Format of the response (url or b64_json)
