@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
-from pydantic import BaseModel
-from typing import List, Optional
+from pydantic import BaseModel, Field
+from typing import List, Optional, Tuple
 import base64
 import os
 from app.services.openai_service import generate_image
+from app.services.image_processing_service import process_image_with_text
 from app.config import get_settings
 
 router = APIRouter(
@@ -23,6 +24,20 @@ class ImageGenerationRequest(BaseModel):
 class ImageGenerationResponse(BaseModel):
     images: List[str]
     prompt: str
+
+class TextOverlayRequest(BaseModel):
+    image_source: str  # URL or base64 encoded image
+    text: str
+    font_size: Optional[int] = Field(default=60, ge=10, le=200)
+    position: Optional[Tuple[int, int]] = Field(default=(0, 0))
+    color: Optional[Tuple[int, int, int]] = Field(default=(255, 255, 255))
+    opacity: Optional[float] = Field(default=0.8, ge=0.0, le=1.0)
+    align: Optional[str] = Field(default="center", pattern="^(left|center|right)$")
+    font_path: Optional[str] = None
+
+class TextOverlayResponse(BaseModel):
+    image: str  # base64 encoded image
+    text: str
 
 @router.post("/generate", response_model=ImageGenerationResponse)
 async def create_image(request: ImageGenerationRequest):
@@ -59,6 +74,43 @@ async def create_image(request: ImageGenerationRequest):
         return ImageGenerationResponse(
             images=images,
             prompt=request.prompt
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/add-text", response_model=TextOverlayResponse)
+async def add_text_to_image(request: TextOverlayRequest):
+    """
+    Add text overlay to an image.
+    
+    - **image_source**: URL or base64 encoded image data
+    - **text**: Text to overlay on the image
+    - **font_size**: Size of the font (10-200)
+    - **position**: (x, y) position of the text
+    - **color**: RGB color tuple for the text
+    - **opacity**: Text opacity (0.0 to 1.0)
+    - **align**: Text alignment ("left", "center", or "right")
+    - **font_path**: Optional path to a font file
+    """
+    try:
+        # Process the image with text overlay
+        processed_image = await process_image_with_text(
+            image_source=request.image_source,
+            text=request.text,
+            font_size=request.font_size,
+            position=request.position,
+            color=request.color,
+            opacity=request.opacity,
+            align=request.align,
+            font_path=request.font_path
+        )
+        
+        # Convert the processed image to base64
+        base64_image = base64.b64encode(processed_image).decode('utf-8')
+        
+        return TextOverlayResponse(
+            image=base64_image,
+            text=request.text
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
