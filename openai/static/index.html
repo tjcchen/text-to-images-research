@@ -28,7 +28,39 @@
                                 <label for="chineseText" class="form-label">Chinese Text (可选中文文本)</label>
                                 <input type="text" class="form-control" id="chineseText" placeholder="请输入要叠加在图片上的中文文本">
                             </div>
-                            
+                            <div class="row mb-3 g-3 align-items-end">
+                                <div class="col-md-4">
+                                    <label for="fontSize" class="form-label">Font Size</label>
+                                    <input type="number" class="form-control" id="fontSize" min="10" max="200" value="60">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="textColor" class="form-label">Text Color</label>
+                                    <input type="color" class="form-control form-control-color" id="textColor" value="#ffffff">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="opacity" class="form-label">Opacity</label>
+                                    <input type="range" class="form-range" id="opacity" min="0" max="100" value="80">
+                                    <div class="text-center" id="opacityValue">80%</div>
+                                </div>
+                            </div>
+                            <div class="row mb-3 g-3 align-items-end">
+                                <div class="col-md-4">
+                                    <label for="textAlign" class="form-label">Alignment</label>
+                                    <select class="form-select" id="textAlign">
+                                        <option value="left">Left</option>
+                                        <option value="center" selected>Center</option>
+                                        <option value="right">Right</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="positionX" class="form-label">X Position</label>
+                                    <input type="number" class="form-control" id="positionX" value="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="positionY" class="form-label">Y Position</label>
+                                    <input type="number" class="form-control" id="positionY" value="0">
+                                </div>
+                            </div>
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label for="size" class="form-label">Size</label>
@@ -45,7 +77,6 @@
                                     <input type="number" class="form-control" id="n" min="1" max="10" value="1">
                                 </div>
                             </div>
-                            
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label for="style" class="form-label">Style</label>
@@ -62,7 +93,6 @@
                                     </select>
                                 </div>
                             </div>
-                            
                             <div class="mb-3">
                                 <label for="response_format" class="form-label">Response Format</label>
                                 <select class="form-select" id="response_format">
@@ -70,8 +100,7 @@
                                     <option value="b64_json">Base64 JSON</option>
                                 </select>
                             </div>
-                            
-                            <button type="submit" class="btn btn-primary" id="generateBtn">Generate Image</button>
+                            <button type="submit" class="btn btn-primary btn-lg w-100" id="generateBtn">Generate Image</button>
                         </form>
                     </div>
                 </div>
@@ -89,57 +118,6 @@
                         </div>
                         <div id="results" class="mt-3">
                             <p class="text-muted text-center">Your generated images will appear here</p>
-                        </div>
-                        
-                        <!-- Text Overlay Form -->
-                        <div id="textOverlayForm" class="mt-4 d-none">
-                            <h3 class="card-title">Add Text Overlay</h3>
-                            <form id="overlayForm">
-                                <div class="mb-3">
-                                    <label for="overlayText" class="form-label">Text</label>
-                                    <input type="text" class="form-control" id="overlayText" placeholder="Enter text to overlay" required>
-                                </div>
-                                
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="fontSize" class="form-label">Font Size</label>
-                                        <input type="number" class="form-control" id="fontSize" min="10" max="200" value="60">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="opacity" class="form-label">Opacity</label>
-                                        <input type="range" class="form-range" id="opacity" min="0" max="100" value="80">
-                                        <div class="text-center" id="opacityValue">80%</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="textColor" class="form-label">Text Color</label>
-                                        <input type="color" class="form-control form-control-color" id="textColor" value="#ffffff">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="textAlign" class="form-label">Alignment</label>
-                                        <select class="form-select" id="textAlign">
-                                            <option value="left">Left</option>
-                                            <option value="center" selected>Center</option>
-                                            <option value="right">Right</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="positionX" class="form-label">X Position</label>
-                                        <input type="number" class="form-control" id="positionX" value="0">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="positionY" class="form-label">Y Position</label>
-                                        <input type="number" class="form-control" id="positionY" value="0">
-                                    </div>
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary" id="addTextBtn">Add Text Overlay</button>
-                            </form>
                         </div>
                     </div>
                 </div>

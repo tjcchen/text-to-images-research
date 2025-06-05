@@ -17,17 +17,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     console.log('Form and button found');
 
-    // Handle form submission
-    // form.addEventListener('submit', function (e) {
-    //     console.log('Form submitted');
-    //     e.preventDefault();
-    //     handleImageGeneration();
-    // });
-
     // Additional direct click handler for the button
     generateBtn.addEventListener('click', function (e) {
         console.log('Generate button clicked');
-        console.log('333');
         e.preventDefault();
         handleImageGeneration();
     });
@@ -44,12 +36,6 @@ document.addEventListener('DOMContentLoaded', function () {
         opacityValue.textContent = `${this.value}%`;
     });
 
-    // Handle text overlay form submission
-    overlayForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        await handleTextOverlay();
-    });
-
     async function handleImageGeneration() {
         // Get form values
         const prompt = document.getElementById('prompt').value;
@@ -59,8 +45,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const style = document.getElementById('style').value;
         const quality = document.getElementById('quality').value;
         const chineseText = document.getElementById('chineseText').value;
+        const fontSize = parseInt(document.getElementById('fontSize').value);
+        const textColor = document.getElementById('textColor').value;
+        const opacity = parseInt(document.getElementById('opacity').value) / 100;
+        const align = document.getElementById('textAlign').value;
+        const positionX = parseInt(document.getElementById('positionX').value);
+        const positionY = parseInt(document.getElementById('positionY').value);
 
-        console.log('Form values:', { prompt, n, size, responseFormat, style, quality, chineseText });
+        // Convert hex color to RGB
+        const r = parseInt(textColor.slice(1, 3), 16);
+        const g = parseInt(textColor.slice(3, 5), 16);
+        const b = parseInt(textColor.slice(5, 7), 16);
+
+        console.log('Form values:', { prompt, n, size, responseFormat, style, quality, chineseText, fontSize, textColor, opacity, align, positionX, positionY });
 
         // Validate form
         if (!prompt) {
@@ -83,9 +80,14 @@ document.addEventListener('DOMContentLoaded', function () {
             quality: quality
         };
 
+        // Force b64_json if Chinese text is present
+        if (chineseText) {
+            requestData.response_format = 'b64_json';
+        }
+
         // Show loading spinner
-        loadingSpinner.classList.remove('d-none');
-        resultsDiv.innerHTML = '';
+        if (loadingSpinner) loadingSpinner.classList.remove('d-none');
+        if (resultsDiv) resultsDiv.innerHTML = '';
         generateBtn.disabled = true;
 
         try {
@@ -117,14 +119,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (chineseText && data.images && data.images.length > 0) {
                 console.log('Chinese text detected, preparing to overlay:', chineseText);
                 let imageSource = data.images[0];
-                if (imageSource.startsWith('http')) {
-                    const imgResp = await fetch(imageSource);
-                    const imgBlob = await imgResp.blob();
-                    imageSource = await blobToBase64(imgBlob);
-                    imageSource = imageSource.replace(/^data:image\/[^;]+;base64,/, '');
-                } else {
-                    imageSource = imageSource.replace(/^data:image\/[^;]+;base64,/, '');
-                }
+                // Always base64 now
+                imageSource = imageSource.replace(/^data:image\/[^;]+;base64,/, '');
                 console.log('Calling overlay API with image source (first 100 chars):', imageSource.slice(0, 100));
                 const overlayResp = await fetch('/api/images/add-text', {
                     method: 'POST',
@@ -132,11 +128,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     body: JSON.stringify({
                         image_source: imageSource,
                         text: chineseText,
-                        font_size: 60,
-                        position: [0, 40],
-                        color: [255, 255, 255],
-                        opacity: 0.8,
-                        align: 'center'
+                        font_size: fontSize,
+                        position: [positionX, positionY],
+                        color: [r, g, b],
+                        opacity: opacity,
+                        align: align
                     })
                 });
                 if (!overlayResp.ok) {
@@ -151,96 +147,24 @@ document.addEventListener('DOMContentLoaded', function () {
             displayResults(data, prompt);
         } catch (error) {
             console.error('Error:', error);
-            resultsDiv.innerHTML = `
-                <div class="alert alert-danger">
-                    <h4>Error</h4>
-                    <p>${error.message}</p>
-                </div>
-            `;
+            if (resultsDiv) {
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h4>Error</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
         } finally {
             // Hide loading spinner
-            loadingSpinner.classList.add('d-none');
+            if (loadingSpinner) loadingSpinner.classList.add('d-none');
             generateBtn.disabled = false;
-        }
-    }
-
-    async function handleTextOverlay() {
-        if (!currentImageSource) {
-            alert('Please generate an image first');
-            return;
-        }
-
-        const text = document.getElementById('overlayText').value;
-        const fontSize = parseInt(document.getElementById('fontSize').value);
-        const opacity = parseInt(opacityInput.value) / 100;
-        const textColor = document.getElementById('textColor').value;
-        const align = document.getElementById('textAlign').value;
-        const positionX = parseInt(document.getElementById('positionX').value);
-        const positionY = parseInt(document.getElementById('positionY').value);
-
-        // Convert hex color to RGB
-        const r = parseInt(textColor.slice(1, 3), 16);
-        const g = parseInt(textColor.slice(3, 5), 16);
-        const b = parseInt(textColor.slice(5, 7), 16);
-
-        // Show loading spinner
-        const addTextBtn = document.getElementById('addTextBtn');
-        addTextBtn.disabled = true;
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        loadingSpinner.classList.remove('d-none');
-
-        console.log('Text overlay form values:', JSON.stringify({
-            image_source: currentImageSource,
-            text: text,
-            font_size: fontSize,
-            position: [positionX, positionY],
-            color: [r, g, b],
-            opacity: opacity,
-            align: align
-        }));
-
-        try {
-            const response = await fetch('/api/images/add-text', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    image_source: currentImageSource,
-                    text: text,
-                    font_size: fontSize,
-                    position: [positionX, positionY],
-                    color: [r, g, b],
-                    opacity: opacity,
-                    align: align
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error ${response.status}: ${await response.text()}`);
-            }
-
-            const data = await response.json();
-
-            // Update the image display
-            const imgElement = document.querySelector('.result-image');
-            if (imgElement) {
-                imgElement.src = `data:image/png;base64,${data.image}`;
-                currentImageSource = `data:image/png;base64,${data.image}`;
-            }
-
-        } catch (error) {
-            console.error('Error:', error);
-            alert(`Error adding text overlay: ${error.message}`);
-        } finally {
-            addTextBtn.disabled = false;
-            loadingSpinner.classList.add('d-none');
         }
     }
 
     function displayResults(data, prompt) {
         console.log('Displaying results:', data);
-
+        
         if (!data || !data.images || !Array.isArray(data.images) || data.images.length === 0) {
             resultsDiv.innerHTML = `
                 <div class="alert alert-warning">
@@ -249,48 +173,42 @@ document.addEventListener('DOMContentLoaded', function () {
                     <p>Response data: ${JSON.stringify(data)}</p>
                 </div>
             `;
-            textOverlayForm.classList.add('d-none');
             return;
         }
-
+        
         resultsDiv.innerHTML = `
             <p class="prompt-text">"${prompt}"</p>
         `;
-
+        
         // Display each image
         data.images.forEach((image, index) => {
             const imgElement = document.createElement('img');
             imgElement.className = 'result-image mb-3';
             imgElement.alt = `Generated image ${index + 1} for: ${prompt}`;
-
+            
             // Handle both URL and base64 formats
             if (image.startsWith('http')) {
                 imgElement.src = image;
-                currentImageSource = image;
             } else {
                 imgElement.src = `data:image/png;base64,${image}`;
-                currentImageSource = `data:image/png;base64,${image}`;
             }
-
+            
             resultsDiv.appendChild(imgElement);
-
+            
             // Add download button for each image
             const downloadBtn = document.createElement('a');
             downloadBtn.className = 'btn btn-sm btn-outline-primary mb-4 d-block';
             downloadBtn.innerHTML = 'Download Image';
             downloadBtn.setAttribute('download', `dalle-image-${Date.now()}-${index}.png`);
-
+            
             if (image.startsWith('http')) {
                 downloadBtn.href = image;
             } else {
                 downloadBtn.href = `data:image/png;base64,${image}`;
             }
-
+            
             resultsDiv.appendChild(downloadBtn);
         });
-
-        // Show the text overlay form
-        textOverlayForm.classList.remove('d-none');
     }
 
     // Helper to convert blob to base64
