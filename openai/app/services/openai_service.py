@@ -17,7 +17,7 @@ def process_response(response, response_format):
     Process the API response and extract image data based on response format.
 
     Sample prompt:
-      Create a trendy social media cover image inspired by Xiaohongshu (RED) posts. Use a modern, youthful aesthetic with a light pastel or stylish vivid color palette. Include soft lighting, and a lifestyle/artistic vibe. Overlay elegant Chinese text “王老师艺术留学工作室” in a clean, semi-transparent font centered or toward the top. The design should look like a fashionable post promoting an art education brand for international students on Xiaohongshu.
+      Create a trendy social media cover image inspired by Xiaohongshu (RED) posts. Use a modern, youthful aesthetic with a light pastel or stylish vivid color palette. Include soft lighting, and a lifestyle/artistic vibe. Overlay elegant Chinese text "王老师艺术留学工作室" in a clean, semi-transparent font centered or toward the top. The design should look like a fashionable post promoting an art education brand for international students on Xiaohongshu.
 
     Args:
         response: The HTTP response from the OpenAI API
@@ -107,7 +107,7 @@ async def generate_image(
         # Try with system proxies first (which might be needed in some environments)
         try:
             logger.info("Attempting connection with system proxies...")
-            async with httpx.AsyncClient(trust_env=True, timeout=30.0) as client:
+            async with httpx.AsyncClient(trust_env=True, timeout=60.0) as client:
                 response = await client.post(url, headers=headers, json=data)
                 logger.info(f"Connection with system proxies successful, status: {response.status_code}")
                 if response.status_code == 200:
