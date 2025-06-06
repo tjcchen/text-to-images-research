@@ -114,7 +114,9 @@ async def add_text_overlay(
         rect_x0 = bg_x - config.padding
         rect_y0 = bg_y - config.padding
         rect_x1 = bg_x + text_width + config.padding
-        rect_y1 = bg_y + text_height + config.padding
+        # Add extra bottom padding for harmony
+        extra_bottom_padding = int(config.font_size * 0.4)
+        rect_y1 = bg_y + text_height + config.padding + extra_bottom_padding
         
         # Draw rounded rectangle background
         bg_color_with_opacity = (*config.bg_color, int(255 * config.bg_opacity))
@@ -123,9 +125,24 @@ async def add_text_overlay(
             radius=config.border_radius,
             fill=bg_color_with_opacity
         )
-        # Draw text with opacity
+        # Draw text with opacity, center each line
         color_with_opacity = (*config.color, int(255 * config.opacity))
-        draw.text((bg_x, bg_y), config.text, font=font, fill=color_with_opacity)
+        lines = config.text.split('\n')
+        line_spacing = int(config.font_size * 1.2)  # 1.2x font size for spacing
+        for i, line in enumerate(lines):
+            bbox = draw.textbbox((0, 0), line, font=font)
+            line_width = bbox[2] - bbox[0]
+            line_height = bbox[3] - bbox[1]
+            if config.align == "center":
+                line_x = bg_x + (text_width - line_width) // 2
+            elif config.align == "right":
+                line_x = bg_x + (text_width - line_width)
+            else:  # left
+                line_x = bg_x
+            line_y = bg_y + i * line_spacing
+            # Simulate bold by drawing text multiple times with slight offsets
+            for dx, dy in [(0,0), (-1,0), (1,0), (0,-1), (0,1)]:
+                draw.text((line_x+dx, line_y+dy), line, font=font, fill=color_with_opacity)
         
         # Composite the text layer onto the image
         result = Image.alpha_composite(image, txt_layer)
