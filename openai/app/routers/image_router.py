@@ -64,8 +64,40 @@ async def create_image(request: ImageGenerationRequest):
         valid_sizes = ["256x256", "512x512", "1024x1024", "1792x1024", "1024x1792"]
         if request.size not in valid_sizes:
             raise HTTPException(status_code=400, detail=f"Size must be one of {valid_sizes}")
-        
-        # Generate images
+
+        # If prompt is empty, use static/image.jpg as background
+        if not request.prompt.strip():
+            # Read the static image as bytes
+            static_image_path = "static/image.jpg"
+            try:
+                with open(static_image_path, "rb") as f:
+                    image_bytes = f.read()
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Failed to load default image: {e}")
+            # Apply overlay if Chinese text is provided
+            chinese_text = getattr(request, 'chinese_text', None) or ""
+            if chinese_text.strip():
+                # Use overlay parameters from request if available
+                overlay_bytes = await process_image_with_text(
+                    image_source=image_bytes,
+                    text=chinese_text,
+                    font_size=getattr(request, 'font_size', 60),
+                    position=getattr(request, 'position', (0, 0)),
+                    color=getattr(request, 'color', (255, 255, 255)),
+                    opacity=getattr(request, 'opacity', 0.8),
+                    align=getattr(request, 'align', 'center'),
+                    font_path=getattr(request, 'font_path', None),
+                    bg_color=getattr(request, 'bg_color', (255, 255, 0)),
+                    bg_opacity=getattr(request, 'bg_opacity', 0.8),
+                    padding=getattr(request, 'padding', 16),
+                    border_radius=getattr(request, 'border_radius', 16)
+                )
+                image_bytes = overlay_bytes
+            # Return as base64
+            base64_image = base64.b64encode(image_bytes).decode('utf-8')
+            return ImageGenerationResponse(images=[base64_image], prompt=request.prompt)
+
+        # Normal DALL-E flow
         images = await generate_image(
             prompt=request.prompt,
             n=request.n,
@@ -74,11 +106,7 @@ async def create_image(request: ImageGenerationRequest):
             style=request.style,
             quality=request.quality
         )
-        
-        return ImageGenerationResponse(
-            images=images,
-            prompt=request.prompt
-        )
+        return ImageGenerationResponse(images=images, prompt=request.prompt)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

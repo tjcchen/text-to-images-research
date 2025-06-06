@@ -72,6 +72,58 @@ document.addEventListener('DOMContentLoaded', function () {
 
         console.log('Form values:', { prompt, n, size, responseFormat, style, quality, chineseText, fontSize, textColor, opacity, align, positionX, positionY, bgColor, bgOpacity, padding, borderRadius });
 
+        // If prompt is empty, use static/image.jpg as background and call overlay API directly
+        if (!prompt.trim()) {
+            // Fetch the default image as base64
+            const resp = await fetch('/static/image.jpg');
+            const blob = await resp.blob();
+            const base64Image = await blobToBase64(blob);
+            const imageSource = base64Image.replace(/^data:image\/[^;]+;base64,/, '');
+            // Call overlay API
+            try {
+                if (loadingSpinner) loadingSpinner.classList.remove('d-none');
+                if (resultsDiv) resultsDiv.innerHTML = '';
+                generateBtn.disabled = true;
+                const overlayResp = await fetch('/api/images/add-text', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image_source: imageSource,
+                        text: chineseText,
+                        font_size: fontSize,
+                        position: [positionX, positionY],
+                        color: [r, g, b],
+                        opacity: opacity,
+                        align: align,
+                        bg_color: [bgr, bgg, bgb],
+                        bg_opacity: bgOpacity,
+                        padding: padding,
+                        border_radius: borderRadius
+                    })
+                });
+                if (!overlayResp.ok) {
+                    throw new Error(`Overlay error ${overlayResp.status}: ${await overlayResp.text()}`);
+                }
+                const overlayData = await overlayResp.json();
+                // Display the result
+                displayResults({ images: [overlayData.image], prompt: prompt }, prompt);
+            } catch (error) {
+                console.error('Error:', error);
+                if (resultsDiv) {
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h4>Error</h4>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                }
+            } finally {
+                if (loadingSpinner) loadingSpinner.classList.add('d-none');
+                generateBtn.disabled = false;
+            }
+            return;
+        }
+
         // Validate form
         if (!prompt) {
             alert('Please enter a prompt');

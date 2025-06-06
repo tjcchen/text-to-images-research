@@ -58,3 +58,6 @@ logs/
 # Generated files
 generated/
 output/
+
+# Misc
+.DS_Store
