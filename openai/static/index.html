@@ -44,7 +44,7 @@
                                 </div>
                             </div>
                             <div class="row mb-3 g-3 align-items-end">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label for="textAlign" class="form-label">Alignment</label>
                                     <select class="form-select" id="textAlign">
                                         <option value="left">Left</option>
@@ -52,13 +52,32 @@
                                         <option value="right">Right</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label for="positionX" class="form-label">X Position</label>
                                     <input type="number" class="form-control" id="positionX" value="0">
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label for="positionY" class="form-label">Y Position</label>
                                     <input type="number" class="form-control" id="positionY" value="0">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="bgColor" class="form-label">Background Color</label>
+                                    <input type="color" class="form-control form-control-color" id="bgColor" value="#fff700">
+                                </div>
+                            </div>
+                            <div class="row mb-3 g-3 align-items-end">
+                                <div class="col-md-4">
+                                    <label for="bgOpacity" class="form-label">Background Opacity</label>
+                                    <input type="range" class="form-range" id="bgOpacity" min="0" max="100" value="80">
+                                    <div class="text-center" id="bgOpacityValue">80%</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="padding" class="form-label">Padding</label>
+                                    <input type="number" class="form-control" id="padding" min="0" max="128" value="16">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="borderRadius" class="form-label">Border Radius</label>
+                                    <input type="number" class="form-control" id="borderRadius" min="0" max="128" value="16">
                                 </div>
                             </div>
                             <div class="row mb-3">

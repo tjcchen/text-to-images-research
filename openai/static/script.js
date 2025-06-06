@@ -29,11 +29,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const overlayForm = document.getElementById('overlayForm');
     const opacityInput = document.getElementById('opacity');
     const opacityValue = document.getElementById('opacityValue');
+    const bgOpacityInput = document.getElementById('bgOpacity');
+    const bgOpacityValue = document.getElementById('bgOpacityValue');
     let currentImageSource = null;
 
     // Update opacity value display
     opacityInput.addEventListener('input', function () {
         opacityValue.textContent = `${this.value}%`;
+    });
+
+    bgOpacityInput.addEventListener('input', function () {
+        bgOpacityValue.textContent = `${this.value}%`;
     });
 
     async function handleImageGeneration() {
@@ -51,13 +57,20 @@ document.addEventListener('DOMContentLoaded', function () {
         const align = document.getElementById('textAlign').value;
         const positionX = parseInt(document.getElementById('positionX').value);
         const positionY = parseInt(document.getElementById('positionY').value);
+        const bgColor = document.getElementById('bgColor').value;
+        const bgOpacity = parseInt(document.getElementById('bgOpacity').value) / 100;
+        const padding = parseInt(document.getElementById('padding').value);
+        const borderRadius = parseInt(document.getElementById('borderRadius').value);
 
         // Convert hex color to RGB
         const r = parseInt(textColor.slice(1, 3), 16);
         const g = parseInt(textColor.slice(3, 5), 16);
         const b = parseInt(textColor.slice(5, 7), 16);
+        const bgr = parseInt(bgColor.slice(1, 3), 16);
+        const bgg = parseInt(bgColor.slice(3, 5), 16);
+        const bgb = parseInt(bgColor.slice(5, 7), 16);
 
-        console.log('Form values:', { prompt, n, size, responseFormat, style, quality, chineseText, fontSize, textColor, opacity, align, positionX, positionY });
+        console.log('Form values:', { prompt, n, size, responseFormat, style, quality, chineseText, fontSize, textColor, opacity, align, positionX, positionY, bgColor, bgOpacity, padding, borderRadius });
 
         // Validate form
         if (!prompt) {
@@ -132,7 +145,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         position: [positionX, positionY],
                         color: [r, g, b],
                         opacity: opacity,
-                        align: align
+                        align: align,
+                        bg_color: [bgr, bgg, bgb],
+                        bg_opacity: bgOpacity,
+                        padding: padding,
+                        border_radius: borderRadius
                     })
                 });
                 if (!overlayResp.ok) {

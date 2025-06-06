@@ -34,6 +34,10 @@ class TextOverlayRequest(BaseModel):
     opacity: Optional[float] = Field(default=0.8, ge=0.0, le=1.0)
     align: Optional[str] = Field(default="center", pattern="^(left|center|right)$")
     font_path: Optional[str] = None
+    bg_color: Optional[Tuple[int, int, int]] = Field(default=(255, 255, 0))
+    bg_opacity: Optional[float] = Field(default=0.8, ge=0.0, le=1.0)
+    padding: Optional[int] = Field(default=16, ge=0, le=128)
+    border_radius: Optional[int] = Field(default=16, ge=0, le=128)
 
 class TextOverlayResponse(BaseModel):
     image: str  # base64 encoded image
@@ -102,7 +106,11 @@ async def add_text_to_image(request: TextOverlayRequest):
             color=request.color,
             opacity=request.opacity,
             align=request.align,
-            font_path=request.font_path
+            font_path=request.font_path,
+            bg_color=request.bg_color,
+            bg_opacity=request.bg_opacity,
+            padding=request.padding,
+            border_radius=request.border_radius
         )
         
         # Convert the processed image to base64

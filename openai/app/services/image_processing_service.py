@@ -19,7 +19,11 @@ class TextOverlayConfig:
         position: Tuple[int, int] = (0, 0),
         color: Tuple[int, int, int] = (255, 255, 255),
         opacity: float = 0.8,
-        align: str = "center"
+        align: str = "center",
+        bg_color: Optional[Tuple[int, int, int]] = None,
+        bg_opacity: float = 0.8,
+        padding: int = 16,
+        border_radius: int = 16
     ):
         self.text = text
         self.font_size = font_size
@@ -28,6 +32,10 @@ class TextOverlayConfig:
         self.color = color
         self.opacity = opacity
         self.align = align
+        self.bg_color = bg_color or (255, 255, 0)  # Default: yellow
+        self.bg_opacity = bg_opacity
+        self.padding = padding
+        self.border_radius = border_radius
 
     def _get_default_font(self) -> str:
         """Get the default font path for Chinese text."""
@@ -51,7 +59,7 @@ async def add_text_overlay(
     config: TextOverlayConfig
 ) -> bytes:
     """
-    Add text overlay to an image.
+    Add text overlay to an image, with Xiaohongshu-style background.
     
     Args:
         image_source: URL or base64 encoded image data
@@ -93,24 +101,31 @@ async def add_text_overlay(
             # Fallback to default font
             font = ImageFont.load_default()
         
-        # Calculate text position
+        # Calculate text position and size
         text_bbox = draw.textbbox(config.position, config.text, font=font)
         text_width = text_bbox[2] - text_bbox[0]
         text_height = text_bbox[3] - text_bbox[1]
         
-        if config.align == "center":
-            x = (image.width - text_width) // 2
-            y = config.position[1]
-        elif config.align == "right":
-            x = image.width - text_width - config.position[0]
-            y = config.position[1]
-        else:  # left align
-            x = config.position[0]
-            y = config.position[1]
+        # Calculate background rectangle
+        bg_x = (image.width - text_width) // 2 if config.align == "center" else (
+            image.width - text_width - config.position[0] if config.align == "right" else config.position[0]
+        )
+        bg_y = config.position[1]
+        rect_x0 = bg_x - config.padding
+        rect_y0 = bg_y - config.padding
+        rect_x1 = bg_x + text_width + config.padding
+        rect_y1 = bg_y + text_height + config.padding
         
+        # Draw rounded rectangle background
+        bg_color_with_opacity = (*config.bg_color, int(255 * config.bg_opacity))
+        draw.rounded_rectangle(
+            [rect_x0, rect_y0, rect_x1, rect_y1],
+            radius=config.border_radius,
+            fill=bg_color_with_opacity
+        )
         # Draw text with opacity
         color_with_opacity = (*config.color, int(255 * config.opacity))
-        draw.text((x, y), config.text, font=font, fill=color_with_opacity)
+        draw.text((bg_x, bg_y), config.text, font=font, fill=color_with_opacity)
         
         # Composite the text layer onto the image
         result = Image.alpha_composite(image, txt_layer)
@@ -136,23 +151,14 @@ async def process_image_with_text(
     color: Tuple[int, int, int] = (255, 255, 255),
     opacity: float = 0.8,
     align: str = "center",
-    font_path: Optional[str] = None
+    font_path: Optional[str] = None,
+    bg_color: Optional[Tuple[int, int, int]] = None,
+    bg_opacity: float = 0.8,
+    padding: int = 16,
+    border_radius: int = 16
 ) -> bytes:
     """
-    Convenience function to process an image with text overlay.
-    
-    Args:
-        image_source: URL or base64 encoded image data
-        text: Text to overlay
-        font_size: Size of the font
-        position: (x, y) position of the text
-        color: RGB color tuple for the text
-        opacity: Text opacity (0.0 to 1.0)
-        align: Text alignment ("left", "center", or "right")
-        font_path: Optional path to a font file
-        
-    Returns:
-        bytes: The processed image data
+    Convenience function to process an image with text overlay, supporting Xiaohongshu style.
     """
     config = TextOverlayConfig(
         text=text,
@@ -161,6 +167,10 @@ async def process_image_with_text(
         color=color,
         opacity=opacity,
         align=align,
-        font_path=font_path
+        font_path=font_path,
+        bg_color=bg_color,
+        bg_opacity=bg_opacity,
+        padding=padding,
+        border_radius=border_radius
     )
     return await add_text_overlay(image_source, config) 
